@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <META charset="UTF-8">
+    <title></title>
+    <style>
+        button {
+            background-color: black;
+            color: white;
+            padding: 5px;
+            font-weight: bold;
+            margin-left: 5%;
+        }
+
+        div {
+            float: left;
+        }
+
+        table {
+            border-collapse: collapse;
+            float: left;
+            border: solid black 1px;
+        }
+
+        tr {
+            padding: 1px;
+        }
+
+        td {
+            border-collapse: collapse;
+            border: solid black 1px;
+            padding: 6px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <button onclick="start()">Iniciar</button>
+    <button onclick="stoping()">Pausar</button>
+    <button onclick="omplirRandom()">Omplir Aleatoriament</button>
+    <div id="malla"></div>
+    <script>
+        // Array per guardar les celules que canviaran.
+        var arrayCambiaran = new Array();
+        function isBlack(cid) {
+            if (document.getElementById(cid).style.backgroundColor == "black") {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        var tm;
+        function start() {
+            tm = window.setInterval('iniciar()', 300);
+        }
+        function stoping() {
+            clearInterval(tm);
+        }
+        function canviBackground(cid) {
+            if (document.getElementById(cid).style.backgroundColor == 'black') {
+                document.getElementById(cid).style.backgroundColor = 'white';
+            } else {
+                document.getElementById(cid).style.backgroundColor = 'black';
+            }
+        }
+        // Realizamos el array de la malla. 
+        var tablaMalla = "<table>";
+        var malla = new Array(35);
+        for (var i = 0; i < 35; i++) {
+            malla[i] = new Array(72);
+        }
+        // Funcion que muestra la malla con las casillas.
+        function mostrarMalla() {
+            for (var i = 0; i < malla.length; i++) {
+                tablaMalla += "<tr>";
+                for (var z = 0; z < malla[i].length; z++) {
+                    malla[i][z] = " ";
+                    tablaMalla += "<td id='c" + i + "_" + z + "' onclick = 'canviBackground(this.id)'>" + malla[i][z] + "</td>";
+                }
+                tablaMalla += "</tr>";
+            }
+            tablaMalla += "</table>";
+            document.getElementById("malla").innerHTML = tablaMalla;
+        }
+        // Function iniciar.
+
+        function iniciar() {
+            oleada();
+        }
+        // Procedimiento si es blanca.
+        function esBlanca(i, z) {
+            var contador;
+            // De momento este doble bucle no recorre los bordes para evitar outofbounds
+            contador = 0;
+            for (var a = i - 1; a < i + 2; a++) {
+                for (var m = z - 1; m < z + 2; m++) {
+                    if (isBlack("c" + a + "_" + m) && !(z == m && a == i)) {
+                        console.log(isBlack("c" + a + "_" + m));
+                        contador++;
+                    }
+                }
+            }
+            // Comprovem si te 3 celules vives al voltant abans de passar a la següent.
+            if (a == i + 2 && m == z + 2) {
+                if (contador == 3) {
+                    // Agreguem a l'array de les que cambiarán el seu ID. 
+                    arrayCambiaran.push("c" + i + "_" + z);
+                }
+            }
+        }
+        // Funció que ompleix aleatoriament.
+        function omplirRandom() {
+            var randomizer;
+            for(var i = 1; i < malla.length - 1; i++) {
+                for(var z = 1; z < malla[i].length - 1; z++) {
+                    randomizer = Math.random();
+                    if(randomizer > 0.5) {
+                        canviBackground("c" + i + "_" + z);
+                    }
+                }
+            }
+        }
+        // Procedimiento si es negra. 
+        function esNegra(i, z) {
+            var contadorN;
+            contadorN = 0;
+            for (var a = i - 1; a < i + 2; a++) {
+                for (var m = z - 1; m < z + 2; m++) {
+                    if (isBlack("c" + a + "_" + m) && !(z == m && a == i)) {
+                        contadorN++;
+                    }
+                }
+            }
+            // Comprovem si te 3 celules vives al voltant abans de passar a la següent.
+            if (a == i + 2 && m == z + 2) {
+                if (contadorN != 3 && contadorN != 2) {
+                    // Agreguem a l'array de les que cambiarán el seu ID. 
+                    console.log("CONTADORENEE: " + contadorN);
+                    arrayCambiaran.push("c" + i + "_" + z);
+                }
+            }
+        }
+
+        function oleada() {
+            // Posem el array de canvis buit.
+            arrayCambiaran = [];
+            // Recorrem cada cuadricula buscant si son negres o blanques i actuant en consequencia.
+            for (var i = 1; i < malla.length - 1; i++) {
+                for (var z = 1; z < malla[i].length - 1; z++) {
+                    if (isBlack("c" + i + "_" + z)) {
+                        esNegra(i, z);
+
+                        console.log("EsNegra? " + isBlack("c" + i + "_" + z));
+                    } else {
+                        console.log("EsBlanca, es Negra?: " + isBlack("c" + i + "_" + z));
+                        esBlanca(i, z);
+                    }
+                }
+            }
+            // Una vegada tenim tots els que han de canviar, executem els canvis.
+            executeOleada();
+            //mostrarMalla();
+            console.log(arrayCambiaran);
+        }
+        function executeOleada() {
+            arrayCambiaran.forEach(function (element) {
+                canviBackground(element);
+            });
+        }
+        mostrarMalla();
+    </script>
+</body>
+</html>
